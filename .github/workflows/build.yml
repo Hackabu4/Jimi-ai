@@ -14,17 +14,21 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    # Егер код басқа папкада болса, мұнда path көрсету керек
+    # Мысалы: path: 'my-project-folder'
+
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
-        cache: 'gradle'
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
     - name: Build with Gradle
+      # Егер build.gradle түпкі папкада болса, working-directory қажет емес
+      # Егер жоба ішкі папкада болса, working-directory: 'path/to/project' қосыңыз
       run: ./gradlew build --stacktrace --warning-mode all
 
     - name: Upload build artifacts
