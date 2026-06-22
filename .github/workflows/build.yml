@@ -14,8 +14,8 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # Егер код басқа папкада болса, мұнда path көрсету керек
-    # Мысалы: path: 'my-project-folder'
+    - name: Debug - List files
+      run: ls -R  # Жоба құрылымын көру үшін қосылды (қатенің қайда екенін дәл табуға көмектеседі)
 
     - name: Set up JDK 17
       uses: actions/setup-java@v4
@@ -23,13 +23,15 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-
     - name: Build with Gradle
-      # Егер build.gradle түпкі папкада болса, working-directory қажет емес
-      # Егер жоба ішкі папкада болса, working-directory: 'path/to/project' қосыңыз
-      run: ./gradlew build --stacktrace --warning-mode all
+      run: |
+        if [ -f "gradlew" ]; then
+          chmod +x gradlew
+          ./gradlew build --stacktrace --warning-mode all
+        else
+          echo "gradlew not found, attempting to use installed gradle"
+          gradle build --stacktrace --warning-mode all
+        fi
 
     - name: Upload build artifacts
       if: success()
