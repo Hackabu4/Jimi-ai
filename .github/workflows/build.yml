@@ -8,13 +8,13 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04 # Жаңа нұсқалармен үйлесімділік үшін ескірмеген нұсқаны таңдаймыз
+    runs-on: ubuntu-22.04 # LTS нұсқасы тұрақтылық үшін
 
     steps:
-    - name: Checkout repository
+    - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up Python
+    - name: Set up Python 3.10
       uses: actions/setup-python@v5
       with:
         python-version: '3.10'
@@ -27,15 +27,22 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        # libtinfo5 орнына libncurses5 қолданамыз, себебі жаңа Ubuntu-да ол стандартты
-        sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncurses5
+        # Libtinfo5 орнына жаңа нұсқадағы балама пакеттер
+        sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip \
+        autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncurses5 \
+        libffi-dev libssl-dev
 
-    - name: Build APK with Buildozer
+    - name: Build APK
       run: |
+        # SDK лицензиясын автоматты түрде қабылдау
+        mkdir -p ~/.android
+        touch ~/.android/repositories.cfg
+        
+        # Buildozer арқылы APK жинау
         buildozer android debug
 
-    - name: Upload APK Artifact
-      if: always() # Билд сәтсіз болса да, логтарды немесе бар артефактілерді көру үшін
+    - name: Upload artifact
+      if: always() # Сәтсіз болса да нәтижені сақтаймыз (Debug үшін)
       uses: actions/upload-artifact@v4
       with:
         name: Jimi-APK
